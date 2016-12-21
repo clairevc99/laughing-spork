@@ -35,14 +35,6 @@ public class Date extends Fragment {
         // Required empty public constructor
     }
 
-    public Date(int year,int month, int day) {
-        Bundle args = new Bundle();
-        args.putInt("year", year);
-        args.putInt("month", month);
-        args.putInt("day", day);
-        setArguments(args);
-    }
-
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -101,6 +93,8 @@ public class Date extends Fragment {
                     + " must implement OnFragmentInteractionListener");
         }
     }
+
+
 
     @Override
     public void onDetach() {
