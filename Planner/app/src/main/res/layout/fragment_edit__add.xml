@@ -1,13 +1,108 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.monjuri.planner.Edit_Add">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
 
-</FrameLayout>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="62dp"
+        android:inputType="textPersonName"
+        android:text="Name of Event:"
+        android:ems="10"
+        android:id="@+id/name"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="18sp"
+        android:textStyle="normal|bold" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:id="@+id/category"
+        android:layout_below="@+id/name"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/textView"
+        android:layout_alignLeft="@+id/button"
+        android:layout_alignStart="@+id/button" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:id="@+id/color"
+        android:layout_below="@+id/category"
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:id="@+id/time"
+        android:layout_below="@+id/color"
+        android:layout_toRightOf="@+id/textView2"
+        android:layout_toEndOf="@+id/textView2" />
+
+    <Button
+        android:text="Done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/time"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="109dp"
+        android:id="@+id/button" />
+
+    <TextView
+        android:text="Category:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView"
+        android:layout_above="@+id/color"
+        android:layout_below="@+id/name"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/button"
+        android:layout_toStartOf="@+id/button"
+        android:textAlignment="center"
+        android:textStyle="normal|bold"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:text="Color:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/time"
+        android:id="@+id/textView2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView"
+        android:layout_toLeftOf="@+id/category"
+        android:layout_toStartOf="@+id/category"
+        android:textSize="18sp"
+        android:textStyle="normal|bold"
+        android:textAlignment="center"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:text="Time:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3"
+        android:layout_toLeftOf="@+id/time"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/color"
+        android:layout_above="@+id/button"
+        android:textSize="18sp"
+        android:textAlignment="center"
+        android:textStyle="normal|bold"
+        android:textColor="@android:color/black" />
+
+</RelativeLayout>

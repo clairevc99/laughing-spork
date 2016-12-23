@@ -18,7 +18,7 @@ import android.widget.Button;
  * Use the {@link Date#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Date extends Fragment {
+public class Date extends Fragment implements Edit_Add.OnFragmentInteractionListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -60,7 +60,7 @@ public class Date extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        add = (Button)getView().findViewById(R.id.add);
+
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,7 +73,12 @@ public class Date extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_date, container, false);
+        View view = inflater.inflate(R.layout.fragment_date, container, false);
+        add = (Button)view.findViewById(R.id.add);
+        //add button listeners here
+        return view;
+
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -115,5 +120,13 @@ public class Date extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void onFragmentInteractionListener(Uri uri){
+
+    }
+
+    public void onFragmentInteraction(Uri uri){
+
     }
 }

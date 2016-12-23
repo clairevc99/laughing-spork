@@ -1,14 +1,18 @@
 package com.example.monjuri.planner;
 
-import android.content.Intent;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.CalendarView;
 
+import static android.drm.DrmStore.DrmObjectType.CONTENT;
+
 public class MainActivity extends AppCompatActivity implements Date.OnFragmentInteractionListener{
     private CalendarView dates;
+    SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,9 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
 
             }
         });
+        db=openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
+        db.execSQL("CREATE TABLE IF NOT EXISTS calendar(index int, name VARCHAR, category VARCHAR, color VARCHAR, time int);");
+
 
 
 

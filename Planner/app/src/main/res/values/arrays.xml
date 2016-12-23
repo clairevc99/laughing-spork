@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="categories">
+        <item>Select</item>
+        <item>Friends</item>
+        <item>Family</item>
+        <item>Assessment</item>
+        <item>Homework</item>
+        <item>Appointment</item>
+
+    </string-array>
+
+
+</resources>
