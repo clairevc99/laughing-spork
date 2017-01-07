@@ -11,5 +11,13 @@
 
     </string-array>
 
+    <string-array name="colors">
+        <item>Select</item>
+        <item>Red</item>
+        <item>Yellow</item>
+        <item>Blue</item>
+
+    </string-array>
+
 
 </resources>

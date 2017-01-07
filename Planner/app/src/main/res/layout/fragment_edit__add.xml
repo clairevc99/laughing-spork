@@ -2,24 +2,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.monjuri.planner.Edit_Add">
+    tools:context="com.example.monjuri.planner.Edit_Add"
+    android:id="@+id/edit_add">
 
     <!-- TODO: Update blank fragment layout -->
 
+
+    <TextView
+        android:text="\nName of Event:"
+        android:layout_width="wrap_content"
+        android:id="@+id/textView4"
+        android:layout_above="@+id/category"
+        android:layout_height="62dp"
+        android:textSize="18sp"
+        android:textStyle="normal|bold"
+        android:textColor="@android:color/black"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/category"
+        android:layout_toStartOf="@+id/category" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="62dp"
         android:inputType="textPersonName"
-        android:text="Name of Event:"
         android:ems="10"
         android:id="@+id/name"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:textSize="18sp"
-        android:textStyle="normal|bold" />
+        android:textStyle="normal|bold"
+        android:layout_toRightOf="@+id/textView4"
+        android:layout_toEndOf="@+id/textView4" />
 
     <Spinner
         android:layout_width="match_parent"
@@ -29,8 +43,9 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_toEndOf="@+id/textView"
-        android:layout_alignLeft="@+id/button"
-        android:layout_alignStart="@+id/button" />
+        android:layout_alignLeft="@+id/done"
+        android:layout_alignStart="@+id/done"
+        android:entries="@array/categories" />
 
     <Spinner
         android:layout_width="match_parent"
@@ -38,24 +53,16 @@
         android:id="@+id/color"
         android:layout_below="@+id/category"
         android:layout_toRightOf="@+id/textView"
-        android:layout_toEndOf="@+id/textView" />
+        android:layout_toEndOf="@+id/textView"
+        android:entries="@array/colors"/>
 
     <Spinner
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:id="@+id/time"
         android:layout_below="@+id/color"
         android:layout_toRightOf="@+id/textView2"
-        android:layout_toEndOf="@+id/textView2" />
-
-    <Button
-        android:text="Done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/time"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="109dp"
-        android:id="@+id/button" />
+        android:layout_toEndOf="@+id/textView2"
+        android:visibility="invisible" />
 
     <TextView
         android:text="Category:"
@@ -66,8 +73,8 @@
         android:layout_below="@+id/name"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/button"
-        android:layout_toStartOf="@+id/button"
+        android:layout_toLeftOf="@+id/done"
+        android:layout_toStartOf="@+id/done"
         android:textAlignment="center"
         android:textStyle="normal|bold"
         android:textAllCaps="false"
@@ -99,10 +106,37 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/color"
-        android:layout_above="@+id/button"
+        android:layout_above="@+id/done"
         android:textSize="18sp"
         android:textAlignment="center"
         android:textStyle="normal|bold"
         android:textColor="@android:color/black" />
+
+    <TimePicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/time"
+        android:timePickerMode="spinner"
+        android:layout_below="@+id/color"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="Done"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/done"
+        android:layout_below="@+id/time"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp" />
+
+    <Button
+        android:text="Back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/done"
+        android:layout_alignLeft="@+id/done"
+        android:layout_alignStart="@+id/done"
+        android:id="@+id/back" />
 
 </RelativeLayout>

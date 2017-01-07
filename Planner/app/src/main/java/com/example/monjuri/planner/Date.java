@@ -1,13 +1,20 @@
 package com.example.monjuri.planner;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.util.Arrays;
 
 
 /**
@@ -27,7 +34,8 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    Button add;
+    Button add, back;
+    TextView today, events;
 
     private OnFragmentInteractionListener mListener;
 
@@ -61,12 +69,7 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // new fragment
-            }
-        });
+
     }
 
     @Override
@@ -75,10 +78,75 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_date, container, false);
         add = (Button)view.findViewById(R.id.add);
-        //add button listeners here
+        add.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bundle args = new Bundle();
+                args.putInt("year", getArguments().getInt("year"));
+                args.putInt("month", getArguments().getInt("month"));
+                args.putInt("day", getArguments().getInt("day"));
+                Edit_Add fragment = new Edit_Add();
+                FragmentManager fm = getFragmentManager();
+                FragmentTransaction ft = fm.beginTransaction();
+                fragment.setArguments(args);
+                ft.replace(R.id.date, fragment);
+                ft.addToBackStack(null);
+                ft.commit();
+                clearButtons();
+            }
+        });
+        today = (TextView)view.findViewById(R.id.current);
+        int day = getArguments().getInt("day");
+        int month = getArguments().getInt("month")+1;
+        int year = getArguments().getInt("year");
+        String today_date = month + "/" + day + "/" + year;
+        today.setText(today_date);
+        back = (Button)view.findViewById(R.id.back);
+        back.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                closeFragment();
+            }
+        });
+        events = (TextView)view.findViewById(R.id.events);
+        String ev = "";
+        SQLiteDatabase db = ((MainActivity)getActivity()).getDb();
+        Cursor c = db.rawQuery("SELECT * FROM calendar WHERE month = ? AND day = ? AND year = ? ORDER BY year ASC, month ASC, day ASC, hour ASC, minute ASC", new String[]{String.valueOf(month), String.valueOf(day), String.valueOf(year)});
+        while (c.moveToNext()) {
+            String minute;
+            minute = c.getInt(c.getColumnIndex("minute")) < 10 ?
+                "0"+c.getString(c.getColumnIndex("minute")) : c.getString(c.getColumnIndex("minute"));
+            ev += (c.getString(c.getColumnIndex("event_name")) + " at " + c.getString(c.getColumnIndex("hour")) + ": " + minute +
+                    " under category " + c.getString(c.getColumnIndex("category"))) + "\n";
+        }
+        c.close();
+        events.setText(ev);
         return view;
 
 
+    }
+
+    public void closeFragment(){
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.remove(this);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+        ft.commit();
+        ((MainActivity)getActivity()).reload();
+    }
+
+    public void clearButtons(){
+        add.setVisibility(View.GONE);
+        back.setVisibility(View.GONE);
+        today.setVisibility(View.GONE);
+        events.setVisibility(View.GONE);
+    }
+
+    public void reload(){
+        add.setVisibility(View.VISIBLE);
+        back.setVisibility(View.VISIBLE);
+        today.setVisibility(View.VISIBLE);
+        events.setVisibility(View.VISIBLE);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -98,7 +166,6 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
                     + " must implement OnFragmentInteractionListener");
         }
     }
-
 
 
     @Override
