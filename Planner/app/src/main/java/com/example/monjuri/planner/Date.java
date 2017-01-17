@@ -3,15 +3,19 @@ package com.example.monjuri.planner;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -35,7 +39,8 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
     private String mParam1;
     private String mParam2;
     Button add, back;
-    TextView today, events;
+    TextView today;
+    LinearLayout parent;
 
     private OnFragmentInteractionListener mListener;
 
@@ -78,6 +83,7 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_date, container, false);
         add = (Button)view.findViewById(R.id.add);
+        add.setBackgroundColor(Color.GREEN);
         add.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,6 +91,7 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
                 args.putInt("year", getArguments().getInt("year"));
                 args.putInt("month", getArguments().getInt("month"));
                 args.putInt("day", getArguments().getInt("day"));
+                args.putBoolean("edit",false);
                 Edit_Add fragment = new Edit_Add();
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
@@ -108,22 +115,104 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
                 closeFragment();
             }
         });
-        events = (TextView)view.findViewById(R.id.events);
-        String ev = "";
-        SQLiteDatabase db = ((MainActivity)getActivity()).getDb();
-        Cursor c = db.rawQuery("SELECT * FROM calendar WHERE month = ? AND day = ? AND year = ? ORDER BY year ASC, month ASC, day ASC, hour ASC, minute ASC", new String[]{String.valueOf(month), String.valueOf(day), String.valueOf(year)});
-        while (c.moveToNext()) {
-            String minute;
-            minute = c.getInt(c.getColumnIndex("minute")) < 10 ?
-                "0"+c.getString(c.getColumnIndex("minute")) : c.getString(c.getColumnIndex("minute"));
-            ev += (c.getString(c.getColumnIndex("event_name")) + " at " + c.getString(c.getColumnIndex("hour")) + ": " + minute +
-                    " under category " + c.getString(c.getColumnIndex("category"))) + "\n";
-        }
-        c.close();
-        events.setText(ev);
+        parent = (LinearLayout)view.findViewById(R.id.eves);
+        addButtons();
+
+        //Helpful links
+        //Too many events?
+
+        //java.awt.Desktop.getDesktop().browse(theURI);
+        //Use to open any web page
         return view;
 
 
+    }
+
+    public void addButtons() {
+        String ev = "";
+        SQLiteDatabase db = ((MainActivity) getActivity()).getDb();
+        int day = getArguments().getInt("day");
+        int month = getArguments().getInt("month")+1;
+        int year = getArguments().getInt("year");
+        Cursor c = db.rawQuery("SELECT * FROM calendar WHERE month = ? AND day = ? AND year = ? ORDER BY year ASC, month ASC, day ASC, hour ASC, minute ASC", new String[]{String.valueOf(month), String.valueOf(day), String.valueOf(year)});
+        while (c.moveToNext()) {
+            Button eve = new Button(getContext());
+            String minute;
+            ev = c.getString(c.getColumnIndex("category")) + "\n";
+            minute = c.getInt(c.getColumnIndex("minute")) < 10 ?
+                    "0" + c.getString(c.getColumnIndex("minute")) : c.getString(c.getColumnIndex("minute"));
+            ev += c.getString(c.getColumnIndex("event_name")) + " at " + c.getString(c.getColumnIndex("hour")) + ": " + minute;
+            eve.setText(ev);
+            eve.setTag(c.getInt(c.getColumnIndex("event_index")));
+            eve.setOnClickListener(new Button.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Bundle args = new Bundle();
+                    args.putInt("year", getArguments().getInt("year"));
+                    args.putInt("month", getArguments().getInt("month"));
+                    args.putInt("day", getArguments().getInt("day"));
+                    Cursor c = ((MainActivity) getActivity()).getDb().rawQuery("SELECT * FROM calendar WHERE event_index=" + v.getTag(), null);
+                    c.moveToFirst();
+                    args.putString("color", c.getString(c.getColumnIndex("color")));
+                    args.putString("category", c.getString(c.getColumnIndex("category")));
+                    args.putString("name", c.getString(c.getColumnIndex("event_name")));
+                    args.putInt("hour", c.getInt(c.getColumnIndex("hour")));
+                    args.putInt("minute", c.getInt(c.getColumnIndex("minute")));
+                    args.putBoolean("edit", true);
+                    c.close();
+                    Edit_Add fragment = new Edit_Add();
+                    FragmentManager fm = getFragmentManager();
+                    FragmentTransaction ft = fm.beginTransaction();
+                    fragment.setArguments(args);
+                    ft.replace(R.id.date, fragment);
+                    ft.addToBackStack(null);
+                    ft.commit();
+                    clearButtons();
+                    //Put event info into edit_add
+                }
+            });
+            eve.setBackgroundColor(Color.WHITE);
+            String col = c.getString(c.getColumnIndex("color"));
+            if (col.equals("Red"))
+                eve.setTextColor(Color.RED);
+            else if (col.equals("Yellow"))
+                eve.setTextColor(Color.YELLOW);
+            else if (col.equals("Blue"))
+                eve.setTextColor(Color.BLUE);
+            else if (col.equals("Black"))
+                eve.setTextColor(Color.BLACK);
+            parent.addView(eve);
+            String cat = c.getString(c.getColumnIndex("category"));
+            if (cat.equals("Homework")){
+                TextView link = new TextView(getContext());
+                link.setMovementMethod(LinkMovementMethod.getInstance());
+                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.docs.google.com'>Google Docs</a>"));
+                parent.addView(link);
+
+            } else if (cat.equals("Appointment")) {
+                TextView link = new TextView(getContext());
+                link.setMovementMethod(LinkMovementMethod.getInstance());
+                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.maps.google.com'>Google Maps</a>"));
+                parent.addView(link);
+
+            }
+            else if (cat.equals("Assessment")){
+                TextView link = new TextView(getContext());
+                link.setMovementMethod(LinkMovementMethod.getInstance());
+                link.setText(Html.fromHtml("Recommended Links<br><a href='http://www.quizlet.com'>Quizlet</a><br>"+
+                "<a href='http://www.youtube.com'>Youtube</a>"));
+                parent.addView(link);
+            }else if (cat.equals("Birthday")){
+                TextView link = new TextView(getContext());
+                link.setMovementMethod(LinkMovementMethod.getInstance());
+                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.amazon.com'>Amazon</a>"));
+                parent.addView(link);
+            }
+
+            //Homework - Google docs, Appointments - Google maps, Assessments - Quizlet + Youtube, Birthdays - Amazon
+
+        }
+        c.close();
     }
 
     public void closeFragment(){
@@ -139,14 +228,14 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
         add.setVisibility(View.GONE);
         back.setVisibility(View.GONE);
         today.setVisibility(View.GONE);
-        events.setVisibility(View.GONE);
+        parent.setVisibility(View.GONE);
     }
 
     public void reload(){
         add.setVisibility(View.VISIBLE);
         back.setVisibility(View.VISIBLE);
         today.setVisibility(View.VISIBLE);
-        events.setVisibility(View.VISIBLE);
+        parent.setVisibility(View.VISIBLE);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

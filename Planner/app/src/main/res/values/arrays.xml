@@ -8,6 +8,8 @@
         <item>Assessment</item>
         <item>Homework</item>
         <item>Appointment</item>
+        <item>School</item>
+        <item>Birthday</item>
 
     </string-array>
 
@@ -16,6 +18,7 @@
         <item>Red</item>
         <item>Yellow</item>
         <item>Blue</item>
+        <item>Black</item>
 
     </string-array>
 

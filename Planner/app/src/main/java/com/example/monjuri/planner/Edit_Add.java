@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -35,7 +36,7 @@ public class Edit_Add extends Fragment{
     Spinner category, color;
     TimePicker time;
     EditText name;
-    Button done, back;
+    Button done, back, del;
 
 
     // TODO: Rename and change types of parameters
@@ -84,7 +85,33 @@ public class Edit_Add extends Fragment{
         color = (Spinner)view.findViewById(R.id.color);
         time = (TimePicker)view.findViewById(R.id.time);
         name = (EditText)view.findViewById(R.id.name);
+        if (getArguments().getBoolean("edit")){
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                time.setHour(getArguments().getInt("hour"));
+                time.setMinute(getArguments().getInt("minute"));
+            }
+            else {
+                time.setCurrentHour(getArguments().getInt("hour"));
+                time.setCurrentMinute(getArguments().getInt("minute"));
+            }
+            name.setText(getArguments().getString("name"));
+            String[] cats = getResources().getStringArray(R.array.categories);
+            int i = 0;
+            int j = 0;
+            for (; i < cats.length; i++)
+                if (cats[i].equals(getArguments().getString("category")))
+                    break;
+            String[] cols = getResources().getStringArray(R.array.colors);
+            for (; j < cols.length; j++)
+                if (cols[j].equals(getArguments().getString("color")))
+                    break;
+
+            category.setSelection(i);//Get array index from arrays.xml
+            color.setSelection(j);
+
+        }
         done = (Button)view.findViewById(R.id.done);
+        done.setBackgroundColor(Color.GREEN);
         done.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -104,14 +131,28 @@ public class Edit_Add extends Fragment{
                     hour = time.getCurrentHour();
                     minute = time.getCurrentMinute();
                 }
-                if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals(""))
+                if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals("") || name_choice.contains("\""))
                     Toast.makeText(getContext(), "Invalid event", Toast.LENGTH_SHORT).show();
                 else{
                     SQLiteDatabase db = ((MainActivity) getActivity()).getDb();
-                    Cursor c = db.rawQuery("SELECT * FROM calendar WHERE event_name=? AND day=?", new String[]{name_choice, String.valueOf(day)});
-                    if (c.moveToFirst()) {
-                        Toast.makeText(getContext(), "Duplicate event", Toast.LENGTH_SHORT).show();
-                        return;
+                    if (getArguments().getBoolean("edit")){
+                        //Name, color, category, time
+                        if (!name_choice.equals(getArguments().getString("name")) || !col_choice.equals(getArguments().getString("color")) || !cat_choice.equals(getArguments().getString("category")) || hour != getArguments().getInt("hour") || minute != getArguments().getInt("minute")) {
+                            db.delete("calendar","event_name=\""+getArguments().getString("name")+"\"",null);
+                        }
+                        else {
+                            Toast.makeText(getContext(), "Event already exists", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                    else {
+                        Cursor c = db.rawQuery("SELECT * FROM calendar WHERE event_name=? AND day=?", new String[]{name_choice, String.valueOf(day)});
+                        if (c.moveToFirst()) {
+                            Toast.makeText(getContext(), "Duplicate event", Toast.LENGTH_SHORT).show();
+                            c.close();
+                            return;
+                        }
+                        c.close();
                     }
                     ContentValues cv = new ContentValues();
                     cv.put("event_index", ((MainActivity)getActivity()).count++);
@@ -123,7 +164,9 @@ public class Edit_Add extends Fragment{
                     cv.put("year", year);
                     cv.put("hour", hour);
                     cv.put("minute", minute);
-                    db.insert("calendar",null, cv);
+                    cv.put("notified", 0);
+                    System.out.println("*********");
+                    System.out.println(db.insert("calendar",null, cv));
                     if (getFragmentManager().getBackStackEntryCount()>0) {
                         getFragmentManager().popBackStack();
                     }
@@ -131,6 +174,7 @@ public class Edit_Add extends Fragment{
                     Toast.makeText(getContext(), "Event entered", Toast.LENGTH_SHORT).show();
 
                 }
+                ((MainActivity)getActivity()).pushNotifications();
                     //add to database
             }
         });
@@ -145,6 +189,22 @@ public class Edit_Add extends Fragment{
             }
         }
         );
+        del = (Button)view.findViewById(R.id.Delete);
+        del.setBackgroundColor(Color.RED);
+        del.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SQLiteDatabase db = ((MainActivity)getActivity()).getDb();
+                if (getArguments().getBoolean("edit")) {
+                    db.delete("calendar", "event_name=\""+getArguments().getString("name")+"\"",null);
+                    Toast.makeText(getContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                }
+                if (getFragmentManager().getBackStackEntryCount()>0) {
+                        getFragmentManager().popBackStack();
+                }
+                backPress();
+            }
+        });
         return view;
     }
 

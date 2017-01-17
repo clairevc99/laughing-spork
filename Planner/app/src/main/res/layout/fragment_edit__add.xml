@@ -126,17 +126,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/done"
+        android:layout_alignBaseline="@+id/Delete"
+        android:layout_alignBottom="@+id/Delete"
+        android:layout_toRightOf="@+id/textView3"
+        android:layout_toEndOf="@+id/textView3" />
+
+    <Button
+        android:text="Delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Delete"
         android:layout_below="@+id/time"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp" />
+        android:layout_toRightOf="@+id/done"
+        android:layout_toEndOf="@+id/done" />
 
     <Button
         android:text="Back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/back"
         android:layout_below="@+id/done"
-        android:layout_alignLeft="@+id/done"
-        android:layout_alignStart="@+id/done"
-        android:id="@+id/back" />
+        android:layout_alignRight="@+id/Delete"
+        android:layout_alignEnd="@+id/Delete"
+        android:layout_marginRight="41dp"
+        android:layout_marginEnd="41dp" />
 
 </RelativeLayout>
