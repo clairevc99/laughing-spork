@@ -153,7 +153,7 @@ public class Edit_Add extends Fragment{
                     hour = time.getCurrentHour();
                     minute = time.getCurrentMinute();
                 }
-                if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals("") || name_choice.contains("\""))
+                if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals(""))
                     Toast.makeText(getContext(), "Invalid event", Toast.LENGTH_SHORT).show();
                 else if (cat_choice.equals("Assessment") && name_choice.split("on").length != 2) {
                     Toast.makeText(getContext(), "Wrong number of 'on' statements\nShould be like 'Subject on topic 1, topic 2'", Toast.LENGTH_LONG).show();
@@ -163,7 +163,7 @@ public class Edit_Add extends Fragment{
                     if (getArguments().getBoolean("edit")){
                         //Name, color, category, time
                         if (!name_choice.equals(getArguments().getString("name")) || !col_choice.equals(getArguments().getString("color")) || !cat_choice.equals(getArguments().getString("category")) || hour != getArguments().getInt("hour") || minute != getArguments().getInt("minute")) {
-                            db.delete("calendar","event_name=\""+getArguments().getString("name")+"\"",null);
+                            db.delete("calendar","event_name=\""+getArguments().getString("name").replaceAll("\"","\\\"")+"\"",null);
                         }
                         else {
                             Toast.makeText(getContext(), "Event already exists", Toast.LENGTH_SHORT).show();
@@ -180,8 +180,7 @@ public class Edit_Add extends Fragment{
                         c.close();
                     }
                     ContentValues cv = new ContentValues();
-                    cv.put("event_index", ((MainActivity)getActivity()).count++);
-                    cv.put("event_name", name_choice);
+                    cv.put("event_name", name_choice.replaceAll("\"","\\\""));
                     cv.put("category", cat_choice);
                     cv.put("color", col_choice);
                     cv.put("month", month);
@@ -211,7 +210,7 @@ public class Edit_Add extends Fragment{
             public void onClick(View v) {
                 SQLiteDatabase db = ((MainActivity)getActivity()).getDb();
                 if (getArguments().getBoolean("edit")) {
-                    db.delete("calendar", "event_name=\""+getArguments().getString("name")+"\"",null);
+                    db.delete("calendar", "event_name=\""+getArguments().getString("name").replaceAll("\"","\\\"")+"\"",null);
                     Toast.makeText(getContext(), "Event deleted", Toast.LENGTH_SHORT).show();
                 }
                 if (getFragmentManager().getBackStackEntryCount()>0) {

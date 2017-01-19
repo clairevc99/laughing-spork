@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     private CalendarView dates;
     private DatePicker oldDates;
     SQLiteDatabase db;
-    int count;
     Timer notifs;
     boolean backClicked = false;
     Button oldDatesSelect;
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         }
 
         db=openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS calendar (event_index int, event_name VARCHAR, category VARCHAR, color VARCHAR, month int, day int, year int, hour int, minute int, notified int);");
+        db.execSQL("CREATE TABLE IF NOT EXISTS calendar (event_index INTEGER PRIMARY KEY AUTOINCREMENT, event_name VARCHAR, category VARCHAR, color VARCHAR, month int, day int, year int, hour int, minute int, notified int);");
         //db.execSQL("DROP TABLE IF EXISTS calendar");
         //db.delete("calendar",null,null);
         enableStrictMode();
@@ -121,12 +120,16 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         GregorianCalendar notifDate = new GregorianCalendar();
         notifDate.add(Calendar.HOUR,3);
         GregorianCalendar now = new GregorianCalendar();
+        GregorianCalendar expiredDate = new GregorianCalendar();
+        expiredDate.add(Calendar.HOUR,-1);
 
         Cursor c = db.rawQuery("SELECT * FROM calendar",null);
         while (c.moveToNext()) {
             //Check if date of event is before notifDate but after now
             GregorianCalendar event_time = new GregorianCalendar(c.getInt(c.getColumnIndex("year")),c.getInt(c.getColumnIndex("month"))-1,c.getInt(c.getColumnIndex("day")),
                     c.getInt(c.getColumnIndex("hour")),c.getInt(c.getColumnIndex("minute")));
+            if (event_time.before(expiredDate))
+                continue;
             if (event_time.before(notifDate)) {
                 NotificationCompat.Builder mBuilder;
                 if (c.getInt(c.getColumnIndex("notified")) == 0)
@@ -179,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
             if (!c.moveToFirst())
                 for (int j = currentYear; j <= finalYear; j++) {
                     ContentValues cv = new ContentValues();
-                    cv.put("event_index", count++);
                     cv.put("event_name", holidays[i]);
                     cv.put("category", "Holiday");
                     cv.put("color", "Black");
@@ -275,7 +277,6 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
                 Cursor c = db.rawQuery("SELECT * FROM calendar WHERE event_name=? AND day=?", new String[]{description, String.valueOf(days[0])});
                 while (days[k] != 0) {
                     ContentValues cv = new ContentValues();
-                    cv.put("event_index", count++);
                     cv.put("event_name", description);
                     cv.put("category", "School");
                     cv.put("color", "Black");
