@@ -7,15 +7,18 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.DatePicker;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,31 +34,62 @@ import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements Date.OnFragmentInteractionListener, Edit_Add.OnFragmentInteractionListener{
     private CalendarView dates;
+    private DatePicker oldDates;
     SQLiteDatabase db;
     int count;
     Timer notifs;
     boolean backClicked = false;
+    Button oldDatesSelect;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dates = (CalendarView)findViewById(R.id.cal);
-        dates.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                dates.setVisibility(View.GONE);
-                Fragment myFragment = new Date();
-                Bundle args = new Bundle();
-                args.putInt("year", year);
-                args.putInt("month", month);
-                args.putInt("day", dayOfMonth);
-                myFragment.setArguments(args);
-                getSupportFragmentManager().beginTransaction().replace(R.id.activity_main, myFragment).addToBackStack("Main").commit();
+        dates = (CalendarView) findViewById(R.id.cal);
+        oldDates = (DatePicker) findViewById(R.id.oldDates);
+        oldDatesSelect = (Button) findViewById(R.id.oldDatesSelect);
+        oldDatesSelect.setBackgroundColor(Color.rgb(0,128,255));
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            oldDates.setVisibility(View.GONE);
+            oldDatesSelect.setVisibility(View.GONE);
+            dates.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+                @Override
+                public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
+                    dates.setVisibility(View.GONE);
+                    Fragment myFragment = new Date();
+                    Bundle args = new Bundle();
+                    args.putInt("year", year);
+                    args.putInt("month", month);
+                    args.putInt("day", dayOfMonth);
+                    myFragment.setArguments(args);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.activity_main, myFragment).addToBackStack("Main").commit();
 
-            }
-        });
+                }
+            });
+        }
+        else {
+            dates.setVisibility(View.GONE);
+            oldDatesSelect.setOnClickListener(new Button.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    oldDates.setVisibility(View.GONE);
+                    oldDatesSelect.setVisibility(View.GONE);
+                    Fragment myFragment = new Date();
+                    int year = oldDates.getYear();
+                    int month = oldDates.getMonth();
+                    int dayOfMonth = oldDates.getDayOfMonth();
+                    Bundle args = new Bundle();
+                    args.putInt("year", year);
+                    args.putInt("month", month);
+                    args.putInt("day", dayOfMonth);
+                    myFragment.setArguments(args);
+                    getSupportFragmentManager().beginTransaction().replace(R.id.activity_main, myFragment).addToBackStack("Main").commit();
+                }
+            });
+
+        }
+
         db=openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
         db.execSQL("CREATE TABLE IF NOT EXISTS calendar (event_index int, event_name VARCHAR, category VARCHAR, color VARCHAR, month int, day int, year int, hour int, minute int, notified int);");
         //db.execSQL("DROP TABLE IF EXISTS calendar");
@@ -78,8 +112,11 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     }
 
     public void pushNotifications(){
-        if (!db.isOpen())
-            return;
+        boolean toBeClosed = false;
+        if (!db.isOpen()) {
+            db = openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
+            toBeClosed = true;
+        }
         //Push notifications 3 hours prior to event
         GregorianCalendar notifDate = new GregorianCalendar();
         notifDate.add(Calendar.HOUR,3);
@@ -125,10 +162,36 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
             }
         }
         c.close();
+        if (toBeClosed)
+            db.close();
 
     }
 
     public void getFederalHolidays() {
+        String[] holidays = {"Valentine's Day", "Christmas Eve", "Christmas Day","New Years Eve", "New Years Day", "Groundhog Day",
+        "Saint Patrick's Day","April Fools","Earth Day","Flag Day","Independence Day","Halloween","Veterans Day"};
+        int[] holidays_dates = {2,14,12,24,12,25,12,31,1,1,2,2,3,17,4,1,4,22,6,14,7,4,10,31,11,11};
+        Calendar calendar = Calendar.getInstance();
+        int currentYear = calendar.get(Calendar.YEAR);
+        int finalYear = currentYear + 10;
+        for (int i = 0; i < holidays.length; i++) {
+            Cursor c = db.rawQuery("SELECT * FROM calendar WHERE event_name = \""+holidays[i]+"\" AND year = "+finalYear, null);
+            if (!c.moveToFirst())
+                for (int j = currentYear; j <= finalYear; j++) {
+                    ContentValues cv = new ContentValues();
+                    cv.put("event_index", count++);
+                    cv.put("event_name", holidays[i]);
+                    cv.put("category", "Holiday");
+                    cv.put("color", "Black");
+                    cv.put("month", holidays_dates[2*i]);
+                    cv.put("day", holidays_dates[2*i+1]);
+                    cv.put("year", j);
+                    cv.put("hour", 0);
+                    cv.put("minute", 0);
+                    cv.put("notified",0);
+                    db.insert("calendar",null,cv);
+                }
+        }
 
     }
 
@@ -140,14 +203,14 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     public void onStop(){
         super.onStop();
         db.close();
-        notifs.cancel();
-        notifs = null;
+        //notifs.cancel();
+        //notifs = null;
 
     }
     public void onStart(){
         super.onStart();
         db = openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
-        startTimer();
+        //startTimer();
     }
 
     public void getDOEEvents(){
@@ -258,7 +321,12 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     }
 
     public void reload(){
-        dates.setVisibility(View.VISIBLE);
+        if (android.os.Build.VERSION.SDK_INT >= 23)
+            dates.setVisibility(View.VISIBLE);
+        else{
+            oldDatesSelect.setVisibility(View.VISIBLE);
+            oldDates.setVisibility(View.VISIBLE);
+        }
         backClicked = false;
     }
     public SQLiteDatabase getDb(){

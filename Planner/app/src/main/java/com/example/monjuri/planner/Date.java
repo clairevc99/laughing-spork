@@ -20,8 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.util.Arrays;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -204,13 +202,19 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
             if (cat.equals("Homework")){
                 TextView link = new TextView(getContext());
                 link.setMovementMethod(LinkMovementMethod.getInstance());
-                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.docs.google.com'>Google Docs</a>"));
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.docs.google.com'>Google Docs</a>", Html.FROM_HTML_MODE_LEGACY));
+                else
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.docs.google.com'>Google Docs</a>"));
                 parent.addView(link);
 
             } else if (cat.equals("Appointment")) {
                 TextView link = new TextView(getContext());
                 link.setMovementMethod(LinkMovementMethod.getInstance());
-                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.maps.google.com'>Google Maps</a>"));
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.maps.google.com'>Google Maps</a>", Html.FROM_HTML_MODE_LEGACY));
+                else
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.maps.google.com'>Google Maps</a>"));
                 parent.addView(link);
 
             }
@@ -226,12 +230,19 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
                     if (i + 1 != topicsList.length)
                         links += "<br>";
                 }
-                link.setText(Html.fromHtml("Recommended Links<br>"+links));//FOR EACH TOPIC, INCLUDE LINK
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                    link.setText(Html.fromHtml("Recommended Links<br>"+links, Html.FROM_HTML_MODE_LEGACY));
+                else
+                    link.setText(Html.fromHtml("Recommended Link<br>"+links));
+                //FOR EACH TOPIC, INCLUDE LINK
                 parent.addView(link);
             }else if (cat.equals("Birthday")){
                 TextView link = new TextView(getContext());
                 link.setMovementMethod(LinkMovementMethod.getInstance());
-                link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.amazon.com'>Amazon</a>"));
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N)
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.amazon.com'>Amazon</a>", Html.FROM_HTML_MODE_LEGACY));
+                else
+                    link.setText(Html.fromHtml("Recommended Link<br><a href='http://www.amazon.com'>Amazon</a>"));
                 parent.addView(link);
             }
 
