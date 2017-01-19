@@ -156,7 +156,7 @@ public class Edit_Add extends Fragment{
                 if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals("") || name_choice.contains("\""))
                     Toast.makeText(getContext(), "Invalid event", Toast.LENGTH_SHORT).show();
                 else if (cat_choice.equals("Assessment") && name_choice.split("on").length != 2) {
-                    Toast.makeText(getContext(), "Wrong number of 'on' statements\nShould be like 'Subject on topic 1, topic 2'", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Wrong number of 'on' statements\nShould be like 'Subject on topic 1, topic 2'", Toast.LENGTH_LONG).show();
                 }
                 else{
                     SQLiteDatabase db = ((MainActivity) getActivity()).getDb();

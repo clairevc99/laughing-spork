@@ -157,7 +157,7 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
             ev = c.getString(c.getColumnIndex("category")) + "\n";
             minute = c.getInt(c.getColumnIndex("minute")) < 10 ?
                     "0" + c.getString(c.getColumnIndex("minute")) : c.getString(c.getColumnIndex("minute"));
-            ev += c.getString(c.getColumnIndex("event_name")) + " at " + c.getString(c.getColumnIndex("hour")) + ": " + minute;
+            ev += c.getString(c.getColumnIndex("event_name")) + (!(c.getString(c.getColumnIndex("category")).equals("Holiday")) ? " at " + c.getString(c.getColumnIndex("hour")) + ": " + minute : "");
             eve.setText(ev);
             eve.setTag(c.getInt(c.getColumnIndex("event_index")));
             eve.setOnClickListener(new Button.OnClickListener() {
