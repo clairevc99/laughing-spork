@@ -122,33 +122,21 @@
         android:layout_alignParentEnd="true" />
 
     <Button
-        android:text="Done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/done"
-        android:layout_alignBaseline="@+id/Delete"
-        android:layout_alignBottom="@+id/Delete"
-        android:layout_toRightOf="@+id/textView3"
-        android:layout_toEndOf="@+id/textView3" />
-
-    <Button
         android:text="Delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/Delete"
-        android:layout_below="@+id/time"
-        android:layout_toRightOf="@+id/done"
-        android:layout_toEndOf="@+id/done" />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="23dp" />
 
     <Button
-        android:text="Back"
+        android:text="Done"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/back"
-        android:layout_below="@+id/done"
-        android:layout_alignRight="@+id/Delete"
-        android:layout_alignEnd="@+id/Delete"
-        android:layout_marginRight="41dp"
-        android:layout_marginEnd="41dp" />
+        android:id="@+id/done"
+        android:layout_above="@+id/Delete"
+        android:layout_alignLeft="@+id/Delete"
+        android:layout_alignStart="@+id/Delete" />
 
 </RelativeLayout>

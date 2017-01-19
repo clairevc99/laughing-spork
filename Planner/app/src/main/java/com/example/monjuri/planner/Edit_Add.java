@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,8 @@ public class Edit_Add extends Fragment{
     Spinner category, color;
     TimePicker time;
     EditText name;
-    Button done, back, del;
+    Button done, del;
+    Bundle ar = null;
 
 
     // TODO: Rename and change types of parameters
@@ -81,6 +83,25 @@ public class Edit_Add extends Fragment{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_edit__add, container, false);
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.setOnKeyListener( new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey( View v, int keyCode, KeyEvent event )
+            {
+                if( keyCode == KeyEvent.KEYCODE_BACK )
+                {
+                    ((MainActivity)getActivity()).backClicked = true;
+                    if (getFragmentManager().getBackStackEntryCount()>0) {
+                        getFragmentManager().popBackStack();
+                    }
+                    backPress();
+                    return true;
+                }
+                return false;
+            }
+        } );
         category = (Spinner)view.findViewById(R.id.category);
         color = (Spinner)view.findViewById(R.id.color);
         time = (TimePicker)view.findViewById(R.id.time);
@@ -112,6 +133,7 @@ public class Edit_Add extends Fragment{
         }
         done = (Button)view.findViewById(R.id.done);
         done.setBackgroundColor(Color.GREEN);
+        done.setBackgroundColor(Color.rgb(0,128,255));
         done.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -133,6 +155,9 @@ public class Edit_Add extends Fragment{
                 }
                 if (cat_choice.equals("Select") || col_choice.equals("Select") || name_choice.trim().equals("") || name_choice.contains("\""))
                     Toast.makeText(getContext(), "Invalid event", Toast.LENGTH_SHORT).show();
+                else if (cat_choice.equals("Assessment") && name_choice.split("on").length != 2) {
+                    Toast.makeText(getContext(), "Wrong number of 'on' statements\nShould be like 'Subject on topic 1, topic 2'", Toast.LENGTH_SHORT).show();
+                }
                 else{
                     SQLiteDatabase db = ((MainActivity) getActivity()).getDb();
                     if (getArguments().getBoolean("edit")){
@@ -165,8 +190,7 @@ public class Edit_Add extends Fragment{
                     cv.put("hour", hour);
                     cv.put("minute", minute);
                     cv.put("notified", 0);
-                    System.out.println("*********");
-                    System.out.println(db.insert("calendar",null, cv));
+                    db.insert("calendar",null, cv);
                     if (getFragmentManager().getBackStackEntryCount()>0) {
                         getFragmentManager().popBackStack();
                     }
@@ -178,19 +202,10 @@ public class Edit_Add extends Fragment{
                     //add to database
             }
         });
-        back = (Button)view.findViewById(R.id.back);
-        back.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getFragmentManager().getBackStackEntryCount()>0) {
-                    getFragmentManager().popBackStack();
-                }
-                backPress();
-            }
-        }
-        );
         del = (Button)view.findViewById(R.id.Delete);
-        del.setBackgroundColor(Color.RED);
+        if (!getArguments().getBoolean("edit"))
+            del.setVisibility(View.INVISIBLE);
+        del.setBackgroundColor(Color.rgb(102,178,255));
         del.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -207,6 +222,8 @@ public class Edit_Add extends Fragment{
         });
         return view;
     }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -232,7 +249,6 @@ public class Edit_Add extends Fragment{
         time.setVisibility(View.GONE);
         name.setVisibility(View.GONE);
         done.setVisibility(View.GONE);
-        back.setVisibility(View.GONE);
 
     }
     public void closeFragment(){
@@ -243,6 +259,56 @@ public class Edit_Add extends Fragment{
         ft.commit();
         ((MainActivity)getActivity()).reload();
     }
+
+    public void onStop(){
+        super.onStop();
+        ar = new Bundle();
+        ar.putString("name", name.getText().toString());
+        ar.putString("category", category.getSelectedItem().toString());
+        ar.putString("color", color.getSelectedItem().toString());
+        ar.putInt("day", getArguments().getInt("day"));
+        ar.putInt("year",getArguments().getInt("year"));
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            ar.putInt("hour",time.getHour());
+            ar.putInt("minute",time.getMinute());
+        }
+        else {
+            ar.putInt("hour",time.getCurrentHour());
+            ar.putInt("minute",time.getCurrentMinute());
+        }
+
+    }
+
+    public void onStart(){
+        super.onStart();
+        if (ar == null)
+            return;
+        if (android.os.Build.VERSION.SDK_INT >= 23) {
+            time.setHour(ar.getInt("hour"));
+            time.setMinute(ar.getInt("minute"));
+        }
+        else {
+            time.setCurrentHour(ar.getInt("hour"));
+            time.setCurrentMinute(ar.getInt("minute"));
+        }
+        name.setText(ar.getString("name"));
+        String[] cats = getResources().getStringArray(R.array.categories);
+        int i = 0;
+        int j = 0;
+        for (; i < cats.length; i++)
+            if (cats[i].equals(ar.getString("category")))
+                break;
+        String[] cols = getResources().getStringArray(R.array.colors);
+        for (; j < cols.length; j++)
+            if (cols[j].equals(ar.getString("color")))
+                break;
+
+        category.setSelection(i);//Get array index from arrays.xml
+        color.setSelection(j);
+        ar = null;
+
+    }
+
 
     @Override
     public void onAttach(Context context) {

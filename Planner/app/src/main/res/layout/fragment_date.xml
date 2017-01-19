@@ -28,23 +28,14 @@
         android:textSize="18sp"
         android:textStyle="normal|bold" />
 
-    <Button
-        android:text="Back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignRight="@+id/add"
-        android:layout_alignEnd="@+id/add"
-        android:layout_marginBottom="15dp"
-        android:id="@+id/back" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_above="@+id/add"
-        android:layout_below="@+id/current">
+        android:layout_below="@+id/current"
+        android:id="@+id/scroll">
 
 
         <LinearLayout

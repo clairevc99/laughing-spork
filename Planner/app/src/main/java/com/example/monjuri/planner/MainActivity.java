@@ -1,27 +1,21 @@
 package com.example.monjuri.planner;
 
-import android.app.ActivityManager;
-import android.app.AlarmManager;
-import android.app.Notification;
+
 import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.StrictMode;
-import android.provider.DocumentsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.CalendarView;
-
-import org.w3c.dom.Document;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,12 +28,13 @@ import java.util.GregorianCalendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static android.drm.DrmStore.DrmObjectType.CONTENT;
 
 public class MainActivity extends AppCompatActivity implements Date.OnFragmentInteractionListener, Edit_Add.OnFragmentInteractionListener{
     private CalendarView dates;
     SQLiteDatabase db;
     int count;
+    Timer notifs;
+    boolean backClicked = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
                 args.putInt("month", month);
                 args.putInt("day", dayOfMonth);
                 myFragment.setArguments(args);
-                getSupportFragmentManager().beginTransaction().replace(R.id.activity_main, myFragment).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.activity_main, myFragment).addToBackStack("Main").commit();
 
             }
         });
@@ -72,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     }
 
     public void startTimer(){
-        Timer notifs = new Timer();
+        notifs = new Timer();
         notifs.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -83,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     }
 
     public void pushNotifications(){
+        if (!db.isOpen())
+            return;
         //Push notifications 3 hours prior to event
         GregorianCalendar notifDate = new GregorianCalendar();
         notifDate.add(Calendar.HOUR,3);
@@ -131,8 +128,26 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
 
     }
 
-    public void getFederalHolidays(){
+    public void getFederalHolidays() {
 
+    }
+
+    @Override
+    public void onBackPressed(){
+        super.onBackPressed();
+    }
+
+    public void onStop(){
+        super.onStop();
+        db.close();
+        notifs.cancel();
+        notifs = null;
+
+    }
+    public void onStart(){
+        super.onStart();
+        db = openOrCreateDatabase("CalendarDB", Context.MODE_PRIVATE, null);
+        startTimer();
     }
 
     public void getDOEEvents(){
@@ -244,6 +259,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
 
     public void reload(){
         dates.setVisibility(View.VISIBLE);
+        backClicked = false;
     }
     public SQLiteDatabase getDb(){
         return db;

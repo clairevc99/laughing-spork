@@ -11,11 +11,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -38,9 +40,10 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    Button add, back;
+    Button add;
     TextView today;
     LinearLayout parent;
+    ScrollView scr;
 
     private OnFragmentInteractionListener mListener;
 
@@ -82,8 +85,30 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_date, container, false);
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.setOnKeyListener( new View.OnKeyListener()
+        {
+            @Override
+            public boolean onKey( View v, int keyCode, KeyEvent event )
+            {
+                if( keyCode == KeyEvent.KEYCODE_BACK )
+                {
+                    if (!((MainActivity)getActivity()).backClicked && getFragmentManager().getBackStackEntryCount()>0) {
+                        getFragmentManager().popBackStack();
+                        ((MainActivity)getActivity()).reload();
+                        return true;
+                    }
+                    else
+                        ((MainActivity)getActivity()).backClicked = false;
+
+                }
+                return false;
+            }
+        } );
+        scr = (ScrollView)view.findViewById(R.id.scroll);
         add = (Button)view.findViewById(R.id.add);
-        add.setBackgroundColor(Color.GREEN);
+        add.setBackgroundColor(Color.rgb(0,128,255));
         add.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,13 +133,6 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
         int year = getArguments().getInt("year");
         String today_date = month + "/" + day + "/" + year;
         today.setText(today_date);
-        back = (Button)view.findViewById(R.id.back);
-        back.setOnClickListener(new Button.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                closeFragment();
-            }
-        });
         parent = (LinearLayout)view.findViewById(R.id.eves);
         addButtons();
 
@@ -199,8 +217,16 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
             else if (cat.equals("Assessment")){
                 TextView link = new TextView(getContext());
                 link.setMovementMethod(LinkMovementMethod.getInstance());
-                link.setText(Html.fromHtml("Recommended Links<br><a href='http://www.quizlet.com'>Quizlet</a><br>"+
-                "<a href='http://www.youtube.com'>Youtube</a>"));
+                String topics = c.getString(c.getColumnIndex("event_name")).substring(c.getString(c.getColumnIndex("event_name")).indexOf("on") + 2);
+                String[] topicsList = topics.split(",");
+                String links = "";
+                for (int i = 0; i < topicsList.length; i++) {
+                    links += "<a href='https://quizlet.com/subject/"+topicsList[i]+"'>Quizlet topic "+(i+1)+"<br>"+
+                            "<a href='https://www.youtube.com/results?search_query="+topicsList[i]+"'>Youtube topic "+(i+1)+"</a>";
+                    if (i + 1 != topicsList.length)
+                        links += "<br>";
+                }
+                link.setText(Html.fromHtml("Recommended Links<br>"+links));//FOR EACH TOPIC, INCLUDE LINK
                 parent.addView(link);
             }else if (cat.equals("Birthday")){
                 TextView link = new TextView(getContext());
@@ -226,16 +252,16 @@ public class Date extends Fragment implements Edit_Add.OnFragmentInteractionList
 
     public void clearButtons(){
         add.setVisibility(View.GONE);
-        back.setVisibility(View.GONE);
         today.setVisibility(View.GONE);
         parent.setVisibility(View.GONE);
+        scr.setVisibility(View.GONE);
     }
 
     public void reload(){
         add.setVisibility(View.VISIBLE);
-        back.setVisibility(View.VISIBLE);
         today.setVisibility(View.VISIBLE);
         parent.setVisibility(View.VISIBLE);
+        scr.setVisibility(View.VISIBLE);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
