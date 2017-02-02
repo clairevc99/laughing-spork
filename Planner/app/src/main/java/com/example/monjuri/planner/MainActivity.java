@@ -19,6 +19,8 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 
+import org.jsoup.Jsoup;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +34,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
+
 public class MainActivity extends AppCompatActivity implements Date.OnFragmentInteractionListener, Edit_Add.OnFragmentInteractionListener{
     private CalendarView dates;
     private DatePicker oldDates;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     Timer notifs;
     boolean backClicked = false;
     Button oldDatesSelect;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

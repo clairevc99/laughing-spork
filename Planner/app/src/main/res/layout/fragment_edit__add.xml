@@ -9,7 +9,7 @@
 
 
     <TextView
-        android:text="\nName of Event:"
+        android:text="\nEvent:"
         android:layout_width="wrap_content"
         android:id="@+id/textView4"
         android:layout_above="@+id/category"
@@ -20,7 +20,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_toLeftOf="@+id/category"
-        android:layout_toStartOf="@+id/category" />
+        android:layout_toStartOf="@+id/category"
+        android:textAlignment="center" />
 
     <EditText
         android:layout_width="wrap_content"
