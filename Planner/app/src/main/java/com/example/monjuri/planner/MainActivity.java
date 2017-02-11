@@ -19,7 +19,21 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlButton;
+import com.gargoylesoftware.htmlunit.html.HtmlFieldSet;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,10 +44,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-
-
 
 public class MainActivity extends AppCompatActivity implements Date.OnFragmentInteractionListener, Edit_Add.OnFragmentInteractionListener{
     private CalendarView dates;
@@ -42,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
     Timer notifs;
     boolean backClicked = false;
     Button oldDatesSelect;
+    String OSIS, PASSWD;
 
 
     @Override
@@ -101,7 +115,127 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         getDOEEvents();
         getFederalHolidays();
         startTimer();
+        //printBXEvents();
+        connectToPP();
     }
+
+    public void printBXEvents(){
+        Document doc = null;
+        try {
+            int month = Calendar.MONTH - 1;
+            Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            doc = Jsoup.connect("http://bxscience.edu/apps/events2/view_calendar.jsp?id=0&m="+month+"&y="+year).get();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+        for (Element table : doc.select("table")) {
+            for (Element row : table.select("tr")) {
+                Elements tds = row.select("td");
+                if (tds.size() > 0) {
+                    for (int i = 0; i < 6; i++)
+                        System.out.println(tds.get(i).text());
+                }
+            }
+        }
+    }
+
+    public void connectToPP(){
+        String strURL = "https://pupilpath.com/homework";
+        String strUserId = "";   //enter user name
+        String strPasword = ""; // enter password
+
+        String authString = strUserId + ":" + strPasword;
+
+        //String encodedString =
+                //new String( Base64.encode(authString.getBytes(), Base64.DEFAULT) );
+        OSIS = strUserId;
+        PASSWD = strPasword;
+        try {
+            siftHTML(getRawData());
+        }
+        catch(Exception e){
+
+        }
+    }
+
+    /*public String getRawData() {
+        System.setProperty("webdriver.gecko.driver", "geckodriver");
+        FirefoxProfile profile = new FirefoxProfile();
+        profile.setPreference("general.useragent.override", "Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0"); //set user-agent
+        WebDriver driver = new FirefoxDriver(profile);
+        try {
+            driver.get("http://www.pupilpath.com");
+            driver.navigate().to("https://pupilpath.skedula.com/redirectToAuth.aspx");
+            driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/form/input[3]")).sendKeys(OSIS);
+            driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/form/input[4]")).sendKeys(PASSWD);
+            driver.findElement(By.xpath("/html/body/div/div[2]/div/div[2]/div[1]/form/button")).click();
+            Thread.sleep(2000);
+            driver.findElement(By.xpath("/html/body/div[1]/div[2]/div[3]/div[2]/div/button")).click();
+            Thread.sleep(2000); //allowing page to load
+            String rawHTML = driver.getPageSource();
+            driver.close();
+            driver.quit();
+            return (rawHTML); //page html
+        } catch (Exception e) {
+            driver.close();
+            driver.quit();
+            System.out.println(e);
+            return ("Error");
+        }
+    }*/
+
+    public String getRawData() throws FailingHttpStatusCodeException, MalformedURLException, InterruptedException {
+        final WebClient driver = new WebClient(BrowserVersion.FIREFOX_45);
+        try {
+            driver.getOptions().setRedirectEnabled(true);
+            driver.getOptions().setJavaScriptEnabled(true);
+            driver.getOptions().setUseInsecureSSL(true);
+            final HtmlPage page2 = driver.getPage("https://pupilpath.skedula.com/redirectToAuth.aspx");
+            final HtmlForm form = page2.getForms().get(0);
+
+            final HtmlTextInput username = form.getInputByName("user[username]");
+            final HtmlPasswordInput password = form.getInputByName("user[password]");
+            final HtmlButton button = (HtmlButton) form.getElementsByTagName("button").get(0);
+            username.setValueAttribute(OSIS);
+            password.setValueAttribute(PASSWD);
+            final HtmlPage page3 = button.click();
+            final HtmlButton button2 = (HtmlButton) page3.getElementsByIdAndOrName("loginSKD").get(0);
+            Thread.sleep(1000); //page loading
+            final HtmlPage page4 = button2.click();
+            Thread.sleep(1000); //page loading
+            String rawHTML = page4.asXml();
+            driver.close();
+            return rawHTML;
+        } catch (Exception e) {
+            driver.close();
+            return ("Error");
+        }
+    }
+
+    public void siftHTML(String rawHTML) {
+        double sum = 0;
+        Document parsedHTML = Jsoup.parse(rawHTML);
+        LinkedList<String> classes = new LinkedList<String>();
+        LinkedList<String> grades = new LinkedList<String>();
+        for (Element row : parsedHTML.getElementById("progress-card").select("tbody").select("tr")) {
+            if((!(row.getElementsByTag("td").get(1).text().contains("LUNCH")) && !(row.getElementsByTag("td").get(1).text().contains("EDUCATION")))) {
+                classes.add(row.getElementsByTag("td").get(1).text()); //index 1 is the name of the course
+                grades.add(row.getElementsByTag("td").get(4).text().substring(4)); //index 4 is the average
+            }
+        }
+        for (int i=0; i<=5;i++) {
+            System.out.print(classes.get(i) + ": ");
+            System.out.println(grades.get(i));
+        }
+        for (String i : grades) {
+            sum += Double.parseDouble(i);
+        }
+        System.out.println("Average = " + sum/grades.size());
+    }
+
 
     public void startTimer(){
         notifs = new Timer();
