@@ -19,7 +19,7 @@ import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
+/*import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlButton;
@@ -27,7 +27,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlFieldSet;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;*/
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         getFederalHolidays();
         startTimer();
         //printBXEvents();
-        connectToPP();
+        //connectToPP();
     }
 
     public void printBXEvents(){
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         }
     }
 
-    public void connectToPP(){
+    /*public void connectToPP(){
         String strURL = "https://pupilpath.com/homework";
         String strUserId = "";   //enter user name
         String strPasword = ""; // enter password
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         catch(Exception e){
 
         }
-    }
+    }*/
 
     /*public String getRawData() {
         System.setProperty("webdriver.gecko.driver", "geckodriver");
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
         }
     }*/
 
-    public String getRawData() throws FailingHttpStatusCodeException, MalformedURLException, InterruptedException {
+    /*public String getRawData() throws FailingHttpStatusCodeException, MalformedURLException, InterruptedException {
         final WebClient driver = new WebClient(BrowserVersion.FIREFOX_45);
         try {
             driver.getOptions().setRedirectEnabled(true);
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements Date.OnFragmentIn
             sum += Double.parseDouble(i);
         }
         System.out.println("Average = " + sum/grades.size());
-    }
+    }*/
 
 
     public void startTimer(){
